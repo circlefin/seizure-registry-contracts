@@ -15,13 +15,89 @@
 # limitations under the License.
 
 name: CI
+
 on:
+  pull_request:
   push:
     branches: [master]
-  pull_request:
 
 jobs:
-  run_ci_tests:
+  lint-and-test:
     runs-on: ubuntu-latest
     steps:
-      - run: exit 0
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version: "22"
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install NPM dependencies
+        run: yarn install --immutable
+
+      - name: Run Linter
+        run: |
+          if find src script -name "*.sol" 2>/dev/null | grep -q .; then
+            yarn run lint
+          else
+            echo "No Solidity files found, skipping lint"
+          fi
+
+      - name: Read Foundry version
+        id: read_foundry_version
+        run: |
+          if [ ! -f .foundry-version ]; then
+            echo "Error: .foundry-version not found" >&2; exit 1
+          fi
+          VERSION="$(tr -d '[:space:]' < .foundry-version)"
+          if [ -z "$VERSION" ]; then
+            echo "Error: .foundry-version is empty" >&2; exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: ${{ steps.read_foundry_version.outputs.version }}
+          cache: true
+
+      - name: Format check
+        run: make fmt-check
+
+      - name: Build
+        run: make build
+
+      - name: Test
+        run: make test
+
+      - name: Coverage
+        run: bash scripts/coverage.sh
+
+      - name: Gas snapshot check
+        run: |
+          if [ -f .gas-snapshot ]; then
+            make snapshot SNAPSHOT_ARGS=--diff
+          else
+            echo "No .gas-snapshot found, generating baseline"
+            make snapshot
+          fi
+
+  build_success_rollup:
+    runs-on: ubuntu-latest
+    name: Build Success Rollup
+    if: ${{ always() }}
+    needs:
+      - lint-and-test
+    steps:
+      - run: |
+          [ "${{ needs.lint-and-test.result }}" = "success" ] || [ "${{ needs.lint-and-test.result }}" = "skipped" ]
+
+  scan:
+    needs: lint-and-test
+    if: github.event_name == 'pull_request'
+    uses: circlefin/circle-public-github-workflows/.github/workflows/pr-scan.yaml@v1

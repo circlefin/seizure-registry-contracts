@@ -1,0 +1,21 @@
+{
+  "extends": "solhint:recommended",
+  "rules": {
+    "compiler-version": ["error", "=0.8.35"],
+    "no-unused-vars": "error",
+    "no-global-import": "error",
+    "no-console": "error",
+    "func-visibility": ["error", { "ignoreConstructors": true }],
+    "private-vars-leading-underscore": "error",
+    "explicit-types": "error",
+    "reason-string": "off",
+    "use-natspec": [
+      "error",
+      {
+        "author": {
+          "enabled": false
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,26 @@
+[profile.default]
+src = "src"
+out = "out"
+libs = ["lib"]
+script = "deploy-contracts"
+solc_version = "0.8.35"
+optimizer = true
+optimizer_runs = 5000
+cbor_metadata = false
+bytecode_hash = "none"
+gas_reports = ["SeizureRegistry"]
+no_match_coverage = "test/|deploy-contracts/"
+fs_permissions = [
+    { access = "read", path = "./deploy-contracts/compiled-contract-artifacts" }
+]
+
+[fuzz]
+runs = 100000
+
+[invariant]
+runs = 500
+depth = 100
+fail_on_revert = true
+
+[lint]
+lint_on_build = false
