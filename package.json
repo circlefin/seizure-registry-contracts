@@ -1,0 +1,14 @@
+{
+  "name": "seizure-registry-contracts",
+  "version": "1.0.0",
+  "private": true,
+  "packageManager": "yarn@4.7.0",
+  "devDependencies": {
+    "solhint": "^6.2.1"
+  },
+  "scripts": {
+    "build": "forge build",
+    "lint": "solhint 'src/**/*.sol' 'script/**/*.sol'",
+    "test": "forge test"
+  }
+}

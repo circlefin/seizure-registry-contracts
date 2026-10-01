@@ -1,0 +1,31 @@
+# Compiler output
+/out/
+/cache/
+
+# Downloaded solc binaries
+soljson-*.js
+
+# OS files
+.DS_Store
+
+# IDE
+.idea/
+
+# Node / Yarn
+/node_modules/
+.pnp.*
+.yarn/*
+!.yarn/releases
+!.yarn/plugins
+
+# Foundry gas snapshots
+.gas-snapshot
+
+# Coverage files
+lcov.info*
+coverage/
+
+# Environment
+.env
+.env.*
+!.env.example
